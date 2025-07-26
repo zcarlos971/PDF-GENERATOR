@@ -4,6 +4,11 @@ const app = express();
 
 app.use(express.json({ limit: "10mb" }));
 
+// Ruta de prueba para comprobar si el servidor está activo
+app.get("/", (req, res) => {
+  res.send("🟢 Servidor PDF corriendo correctamente.");
+});
+
 app.post("/generate", async (req, res) => {
   const { html } = req.body;
   if (!html) return res.status(400).send("Missing HTML");
