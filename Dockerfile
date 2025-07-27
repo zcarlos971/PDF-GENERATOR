@@ -1,7 +1,10 @@
-# Usa Node.js con Puppeteer compatible
-FROM node:20-slim
+# Base image
+FROM node:18-slim
 
-# Instala dependencias requeridas por Chromium
+# Establecer directorio de trabajo
+WORKDIR /app
+
+# Instalar dependencias necesarias para Puppeteer
 RUN apt-get update && apt-get install -y \
     wget \
     ca-certificates \
@@ -20,20 +23,18 @@ RUN apt-get update && apt-get install -y \
     libxdamage1 \
     libxrandr2 \
     xdg-utils \
-    --no-install-recommends \
- && apt-get clean && rm -rf /var/lib/apt/lists/*
+    --no-install-recommends && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Crea carpeta de trabajo
-WORKDIR /app
-
-# Copia archivos de tu proyecto
+# Copiar archivos del proyecto
 COPY . .
 
-# Instala dependencias de Node.js
+# Instalar dependencias del proyecto
 RUN npm install
 
-# Expone el puerto 3000 (ajústalo si usas otro)
-EXPOSE 3000
+# Exponer el puerto
+EXPOSE 8080
 
 # Comando de arranque
 CMD ["node", "server.js"]
