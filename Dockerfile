@@ -1,3 +1,10 @@
+# Imagen base compatible con Puppeteer
+FROM node:20-slim
+
+# Previene preguntas durante la instalación de paquetes
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Instala librerías necesarias para Puppeteer
 RUN apt-get update && apt-get install -y \
   wget \
   ca-certificates \
@@ -23,7 +30,6 @@ RUN apt-get update && apt-get install -y \
   libstdc++6 \
   libx11-6 \
   libx11-xcb1 \
-  libxcb1 \
   libxcomposite1 \
   libxcursor1 \
   libxdamage1 \
@@ -36,3 +42,18 @@ RUN apt-get update && apt-get install -y \
   lsb-release \
   xdg-utils \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Directorio de trabajo
+WORKDIR /app
+
+# Copia los archivos del proyecto
+COPY . .
+
+# Instala dependencias de Node.js
+RUN npm install
+
+# Expone el puerto (Railway lo detecta)
+EXPOSE 8080
+
+# Comando de inicio
+CMD ["node", "server.js"]
