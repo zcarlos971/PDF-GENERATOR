@@ -1,22 +1,22 @@
 const express = require("express");
-const puppeteer = require("puppeteer");
+const chromium = require("chrome-aws-lambda"); // versión optimizada
 const app = express();
 
 app.use(express.json({ limit: "10mb" }));
 
-// Ruta GET para ver si el servidor está vivo
 app.get("/", (req, res) => {
   res.send("🟢 Servidor PDF corriendo correctamente.");
 });
 
-// Ruta POST para generar el PDF
 app.post("/generate", async (req, res) => {
   const { html } = req.body;
   if (!html) return res.status(400).send("Missing HTML");
 
-  const browser = await puppeteer.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  const browser = await chromium.puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath,
+    headless: chromium.headless
   });
 
   const page = await browser.newPage();
@@ -37,4 +37,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🟢 PDF server running on port ${PORT}`);
 });
-
