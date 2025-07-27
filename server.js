@@ -1,37 +1,42 @@
-const express = require("express");
-const puppeteer = require("puppeteer");
+const puppeteer = require('puppeteer');
+const express = require('express');
 const app = express();
+const bodyParser = require('body-parser');
 
-app.use(express.json({ limit: "10mb" }));
+// Permitir recibir HTML como texto plano
+app.use(bodyParser.text({ type: '*/*' }));
 
-app.get("/", (req, res) => {
-  res.send("🟢 Servidor PDF corriendo correctamente.");
+app.post('/generate-pdf', async (req, res) => {
+  const htmlContent = req.body;
+
+  try {
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+
+    const page = await browser.newPage();
+
+    await page.setContent(htmlContent, {
+      waitUntil: 'networkidle0',
+      timeout: 0
+    });
+
+    await page.waitForTimeout(2000); // Espera por si carga imágenes o estilos lentos
+
+    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+
+    await browser.close();
+
+    res.contentType("application/pdf");
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error('Error:', err);
+    res.status(500).send('Failed to generate PDF');
+  }
 });
 
-app.post("/generate", async (req, res) => {
-  const { html } = req.body;
-  if (!html) return res.status(400).send("Missing HTML");
-
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
-  });
-
-  const page = await browser.newPage();
-  await page.setContent(html, { waitUntil: "networkidle0" });
-
-  const pdfBuffer = await page.pdf({ format: "A4" });
-  await browser.close();
-
-  res.set({
-    "Content-Type": "application/pdf",
-    "Content-Disposition": "attachment; filename=document.pdf"
-  });
-
-  res.send(pdfBuffer);
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🟢 PDF server running on port ${PORT}`);
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`PDF Generator running on port ${port}`);
 });
