@@ -1,5 +1,5 @@
 const express = require("express");
-const chromium = require("chrome-aws-lambda"); // versión optimizada
+const puppeteer = require("puppeteer");
 const app = express();
 
 app.use(express.json({ limit: "10mb" }));
@@ -12,11 +12,9 @@ app.post("/generate", async (req, res) => {
   const { html } = req.body;
   if (!html) return res.status(400).send("Missing HTML");
 
-  const browser = await chromium.puppeteer.launch({
-    args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath,
-    headless: chromium.headless
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"]
   });
 
   const page = await browser.newPage();
