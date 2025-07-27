@@ -1,7 +1,7 @@
-# Imagen base con Node.js
-FROM node:18-slim
+# Usa una imagen base con Puppeteer y Chromium ya preparado
+FROM node:20-slim
 
-# Instala dependencias necesarias para que Puppeteer funcione
+# Instala dependencias necesarias para Chromium
 RUN apt-get update && apt-get install -y \
   wget \
   ca-certificates \
@@ -20,20 +20,19 @@ RUN apt-get update && apt-get install -y \
   libxdamage1 \
   libxrandr2 \
   xdg-utils \
-  --no-install-recommends \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+  --no-install-recommends && \
+  rm -rf /var/lib/apt/lists/*
 
-# Crea directorio de trabajo
+# Crea carpeta de trabajo
 WORKDIR /app
 
-# Copia los archivos del proyecto
+# Copia dependencias y código
 COPY package*.json ./
 RUN npm install
 COPY . .
 
-# Expone el puerto que usa tu app
+# Expone el puerto
 EXPOSE 3000
 
-# Comando para arrancar el servidor
-CMD ["npm", "start"]
+# Inicia el servidor
+CMD ["node", "server.js"]
