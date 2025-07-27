@@ -1,3 +1,14 @@
+const puppeteer = require('puppeteer');
+const express = require('express');
+const bodyParser = require('body-parser');
+
+const app = express();
+app.use(bodyParser.text({ type: '*/*' }));
+
+app.get('/', (req, res) => {
+  res.send('Servidor de conversión HTML a PDF activo.');
+});
+
 app.post('/generate-pdf', async (req, res) => {
   const htmlContent = req.body;
 
@@ -9,48 +20,32 @@ app.post('/generate-pdf', async (req, res) => {
 
     const page = await browser.newPage();
 
-    // Configurar un user-agent realista por si bloquean bots
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
-    );
-
-    // Establecer HTML directamente
     await page.setContent(htmlContent, {
-      waitUntil: 'networkidle0',
-      timeout: 0
-    });
-
-    // Espera adicional por imágenes que cargan lento
-    await page.waitForTimeout(2000);
-
-    // Desactiva cualquier marca de agua visual de Carsimulcast
-    await page.evaluate(() => {
-      const marcas = Array.from(document.querySelectorAll('*')).filter(el =>
-        el.innerText?.toLowerCase().includes('carsimulcast')
-      );
-      marcas.forEach(el => el.remove());
-
-      const imgs = document.querySelectorAll('img');
-      imgs.forEach(img => {
-        if (img.src.includes('carsimulcast')) {
-          img.remove(); // O reemplaza src si tienes uno alternativo
-        }
-      });
+      waitUntil: ['networkidle0'],
+      timeout: 60000
     });
 
     const pdfBuffer = await page.pdf({
       format: 'A4',
-      printBackground: true,
-      margin: { top: '30px', bottom: '30px', left: '20px', right: '20px' }
+      printBackground: true
     });
 
     await browser.close();
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=reporte.pdf');
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename=carfax.pdf',
+      'Content-Length': pdfBuffer.length
+    });
+
     res.send(pdfBuffer);
   } catch (err) {
-    console.error('Error generando PDF:', err);
-    res.status(500).send('Error al generar el PDF');
+    console.error('Error al generar PDF:', err);
+    res.status(500).send('Error generando PDF');
   }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en puerto ${PORT}`);
 });
