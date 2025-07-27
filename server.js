@@ -4,11 +4,12 @@ const app = express();
 
 app.use(express.json({ limit: "10mb" }));
 
-// Ruta de prueba para comprobar si el servidor está activo
+// Ruta GET para ver si el servidor está vivo
 app.get("/", (req, res) => {
   res.send("🟢 Servidor PDF corriendo correctamente.");
 });
 
+// Ruta POST para generar el PDF
 app.post("/generate", async (req, res) => {
   const { html } = req.body;
   if (!html) return res.status(400).send("Missing HTML");
@@ -34,5 +35,6 @@ app.post("/generate", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`PDF server running on port ${PORT}`);
+  console.log(`🟢 PDF server running on port ${PORT}`);
 });
+
