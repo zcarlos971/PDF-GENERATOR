@@ -1,10 +1,10 @@
-# Base image
-FROM node:18-slim
+# Usa una imagen base compatible con Puppeteer
+FROM node:20-slim
 
-# Establecer directorio de trabajo
-WORKDIR /app
+# Evita preguntas durante la instalación
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Instalar dependencias necesarias para Puppeteer
+# Instala librerías necesarias para Puppeteer + utilidades
 RUN apt-get update && apt-get install -y \
     wget \
     ca-certificates \
@@ -13,28 +13,48 @@ RUN apt-get update && apt-get install -y \
     libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
+    libc6 \
+    libcairo2 \
     libcups2 \
     libdbus-1-3 \
-    libgdk-pixbuf2.0-0 \
+    libexpat1 \
+    libfontconfig1 \
+    libgbm1 \
+    libgcc1 \
+    libglib2.0-0 \
+    libgtk-3-0 \
     libnspr4 \
     libnss3 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libstdc++6 \
+    libx11-6 \
     libx11-xcb1 \
+    libxcb1 \
     libxcomposite1 \
+    libxcursor1 \
     libxdamage1 \
+    libxext6 \
+    libxfixes3 \
     libxrandr2 \
+    libxrender1 \
+    libxss1 \
+    libxtst6 \
+    lsb-release \
     xdg-utils \
-    --no-install-recommends && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copiar archivos del proyecto
+# Crea directorio de trabajo
+WORKDIR /app
+
+# Copia los archivos del proyecto
 COPY . .
 
-# Instalar dependencias del proyecto
+# Instala las dependencias
 RUN npm install
 
-# Exponer el puerto
+# Expone el puerto (Railway automáticamente usará el correcto)
 EXPOSE 8080
 
-# Comando de arranque
+# Comando de inicio
 CMD ["node", "server.js"]
