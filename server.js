@@ -1,10 +1,15 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer'); 
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 
 // Permitir recibir HTML como texto plano
 app.use(bodyParser.text({ type: '*/*' }));
+
+// Ruta GET raíz para evitar el error "Cannot GET /"
+app.get('/', (req, res) => {
+  res.send('🚀 Servidor de conversión a PDF activo. Usa POST /generate-pdf para convertir HTML a PDF.');
+});
 
 app.post('/generate-pdf', async (req, res) => {
   const htmlContent = req.body;
