@@ -49,28 +49,19 @@ app.post("/generate-pdf", async (req, res) => {
 
         console.log("Iniciando Puppeteer...");
         
-        // Configurar Puppeteer con acceso completo a internet y Chrome estable
+        // Configurar Puppeteer para la imagen oficial de Puppeteer
         const browser = await puppeteer.launch({
             headless: 'new',
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--disable-gpu',
                 '--no-first-run',
-                '--no-zygote',
-                '--single-process',
                 '--disable-extensions',
                 '--disable-background-timer-throttling',
                 '--disable-backgrounding-occluded-windows',
-                '--disable-renderer-backgrounding',
-                '--disable-features=TranslateUI',
-                '--disable-ipc-flooding-protection',
-                '--enable-features=NetworkService,NetworkServiceInProcess',
-                '--force-color-profile=srgb',
-                '--metrics-recording-only',
-                '--use-mock-keychain'
+                '--disable-renderer-backgrounding'
             ],
         });
 
