@@ -1,6 +1,7 @@
 {
-  "name": "carfax-pdf-server",
+  "name": "carsimulcast-pdf-server",
   "version": "1.0.0",
+  "description": "Convert Carsimulcast HTML reports to PDF - Save credits!",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
