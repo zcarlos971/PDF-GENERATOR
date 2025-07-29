@@ -177,10 +177,10 @@ app.use((error, req, res, next) => {
     });
 });
 
-// Configurar el puerto
+// Configurar el puerto desde variables de entorno (importante para Railway)
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
     console.log(`Endpoints disponibles:`);
     console.log(`  GET  / - Verificar estado del servicio`);
