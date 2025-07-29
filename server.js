@@ -49,9 +49,10 @@ app.post("/generate-pdf", async (req, res) => {
 
         console.log("Iniciando Puppeteer...");
         
-        // Configurar Puppeteer para la imagen oficial de Puppeteer
+        // Configurar Puppeteer para Ubuntu con Chrome instalado
         const browser = await puppeteer.launch({
             headless: 'new',
+            executablePath: '/usr/bin/google-chrome-stable',
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox',
