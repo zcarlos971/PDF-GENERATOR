@@ -4,19 +4,13 @@
   "description": "Servidor para convertir HTML de Carfax a PDF con acceso completo a internet",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
-    "docker:build": "docker build -t carfax-pdf-server .",
-    "docker:run": "docker run -p 3000:3000 carfax-pdf-server"
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "puppeteer": "^21.0.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
   },
   "engines": {
     "node": ">=18.0.0"
