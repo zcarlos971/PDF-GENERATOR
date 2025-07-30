@@ -1,33 +1,40 @@
-# Dockerfile que evita problemas de GPG y repositorios
-FROM ghcr.io/puppeteer/puppeteer:21.0.0
+# Alpine con Chromium - Sin problemas de GPG
+FROM node:18-alpine
 
-# Cambiar a root temporalmente
-USER root
+# Instalar Chromium y dependencias
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    font-noto-emoji
 
-# Solo instalar dependencias adicionales mínimas
-RUN apt-get update && apt-get install -y \
-    fonts-liberation \
-    fonts-dejavu-core \
-    && rm -rf /var/lib/apt/lists/*
+# Variables de entorno para Puppeteer
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    CHROMIUM_PATH=/usr/bin/chromium-browser \
+    NODE_ENV=production
 
-# Directorio de trabajo
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copiar package.json
 COPY package.json ./
 
-# Instalar dependencias (puppeteer ya está incluido en la imagen)
-RUN npm ci --omit=dev --no-audit --no-fund
+# Instalar dependencias de Node
+RUN npm ci --only=production
 
 # Copiar código
 COPY . .
 
-# Variables de entorno
-ENV NODE_ENV=production
+# Crear usuario no-root
+RUN addgroup -g 1000 carsimulcast && \
+    adduser -D -s /bin/sh -u 1000 -G carsimulcast carsimulcast && \
+    chown -R carsimulcast:carsimulcast /app
 
-# Cambiar a usuario no-root (ya existe en la imagen)
-USER pptruser
+USER carsimulcast
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
