@@ -1,44 +1,41 @@
-# Alpine con Chromium - Sin problemas de GPG
+# Imagen base con Node y Alpine
 FROM node:18-alpine
 
-# Instalar Chromium y dependencias necesarias para Puppeteer
+# Instalar Chromium y fuentes necesarias
 RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    freetype-dev \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    font-noto-emoji
+  chromium \
+  nss \
+  freetype \
+  freetype-dev \
+  harfbuzz \
+  ca-certificates \
+  ttf-freefont \
+  font-noto-emoji
 
-# Variables de entorno necesarias para Puppeteer
+# Variables de entorno para Puppeteer
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    CHROMIUM_PATH=/usr/bin/chromium-browser \
+    CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser \
     NODE_ENV=production
 
 # Crear directorio de trabajo
 WORKDIR /app
 
-# Copiar package.json
+# Copiar dependencias
 COPY package.json ./
+COPY package-lock.json ./
 
-# Instalar dependencias (solución al problema)
-RUN npm install --production
+# Instalar dependencias sin errores
+RUN npm ci --omit=dev || npm install --production
 
-# Copiar el resto del código
+# Copiar todo el proyecto
 COPY . .
 
-# Crear un usuario sin privilegios
-RUN addgroup -g 1000 carsimulcast && \
-    adduser -D -s /bin/sh -u 1000 -G carsimulcast carsimulcast && \
-    chown -R carsimulcast:carsimulcast /app
+# Usar un UID/GID aleatorio para evitar conflicto con Railway
+RUN adduser -D -s /bin/sh -u 1001 -G root appuser && \
+    chown -R appuser:root /app
 
-# Ejecutar como usuario no root
-USER carsimulcast
+USER appuser
 
-# Exponer el puerto de la app
 EXPOSE 3000
 
-# Comando de inicio
 CMD ["npm", "start"]
