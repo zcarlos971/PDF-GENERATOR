@@ -10,11 +10,11 @@ app.use(bodyParser.text({ type: "*/*", limit: "50mb" }));
 app.use(bodyParser.json({ limit: "50mb" }));
 
 app.get("/", (req, res) => {
-    res.send("\uD83D\uDE97 Carsimulcast to PDF Server - Ahorra cr\u00e9ditos convirtiendo HTML a PDF");
+    res.send("🚗 Carsimulcast to PDF Server - Ahorra créditos convirtiendo HTML a PDF");
 });
 
 app.post("/carsimulcast-to-pdf", async (req, res) => {
-    console.log("\uD83D\uDE80 Iniciando conversi\u00f3n de Carsimulcast HTML a PDF");
+    console.log("🚀 Iniciando conversión de Carsimulcast HTML a PDF");
     try {
         let htmlContent = req.body;
 
@@ -29,9 +29,9 @@ app.post("/carsimulcast-to-pdf", async (req, res) => {
             } else if (htmlContent.match(/^[A-Za-z0-9+/]*={0,2}$/)) {
                 try {
                     htmlContent = Buffer.from(htmlContent, 'base64').toString('utf-8');
-                    console.log("\u2705 HTML base64 decodificado correctamente");
+                    console.log("✅ HTML base64 decodificado correctamente");
                 } catch (e) {
-                    console.log("\u26A0\uFE0F No es base64 v\u00e1lido, usando como texto plano");
+                    console.log("⚠️ No es base64 válido, usando como texto plano");
                 }
             }
         }
@@ -40,26 +40,22 @@ app.post("/carsimulcast-to-pdf", async (req, res) => {
             throw new Error("HTML content is too short or invalid");
         }
 
-        console.log(`\uD83D\uDCC4 HTML length: ${htmlContent.length} characters`);
+        console.log(`📄 HTML length: ${htmlContent.length} characters`);
 
         const browser = await puppeteer.launch({
             headless: 'new',
             executablePath: '/usr/bin/google-chrome-stable',
             args: [
                 '--no-sandbox', '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage', '--disable-gpu', '--no-first-run',
-                '--disable-extensions', '--disable-background-timer-throttling',
-                '--disable-backgrounding-occluded-windows', '--disable-renderer-backgrounding',
-                '--disable-web-security', '--disable-features=VizDisplayCompositor',
-                '--allow-running-insecure-content', '--ignore-certificate-errors', '--ignore-ssl-errors'
-            ],
+                '--disable-dev-shm-usage', '--disable-gpu',
+                '--disable-extensions', '--disable-web-security',
+                '--disable-features=VizDisplayCompositor',
+                '--allow-running-insecure-content', '--ignore-certificate-errors'
+            ]
         });
 
         const page = await browser.newPage();
-        await page.setDefaultTimeout(90000);
-        await page.setDefaultNavigationTimeout(90000);
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36');
         await page.setExtraHTTPHeaders({
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.9,es;q=0.8',
@@ -67,11 +63,10 @@ app.post("/carsimulcast-to-pdf", async (req, res) => {
             'Pragma': 'no-cache'
         });
 
-        console.log("\uD83D\uDD27 Configurando contenido HTML...");
-
+        console.log("🔧 Configurando contenido HTML...");
         await page.setContent(htmlContent, { waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 90000 });
-        console.log("\uD83D\uDDFC\uFE0F Esperando carga de im\u00e1genes...");
 
+        console.log("🖼️ Esperando carga de imágenes...");
         const imageLoadResult = await page.evaluate(async () => {
             const images = Array.from(document.querySelectorAll('img'));
             const totalImages = images.length;
@@ -93,7 +88,7 @@ app.post("/carsimulcast-to-pdf", async (req, res) => {
         });
 
         await page.waitForTimeout(5000);
-        console.log("\uD83D\uDCC1 Generando PDF...");
+        console.log("📁 Generando PDF...");
 
         const pdfBuffer = await page.pdf({
             format: "A4",
@@ -118,11 +113,11 @@ app.post("/carsimulcast-to-pdf", async (req, res) => {
         res.send(pdfBuffer);
 
     } catch (error) {
-        console.error("\u274C Error generando PDF:", error);
+        console.error("❌ Error generando PDF:", error);
         res.status(500).json({ error: "Error generando PDF de Carsimulcast", details: error.message });
     }
 });
 
 app.listen(process.env.PORT || 3000, '0.0.0.0', () => {
-    console.log("\uD83D\uDE80 Servidor PDF activo en Railway ✅");
+    console.log("🚀 Servidor PDF activo en Railway ✅");
 });
