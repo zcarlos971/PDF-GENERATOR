@@ -1,41 +1,45 @@
-# Imagen base con Node y Alpine
+# Base Node con Alpine
 FROM node:18-alpine
 
-# Instalar Chromium y fuentes necesarias
+# Instalamos dependencias por bloques para evitar timeout
 RUN apk add --no-cache \
-  chromium \
-  nss \
-  freetype \
-  freetype-dev \
-  harfbuzz \
-  ca-certificates \
-  ttf-freefont \
-  font-noto-emoji
+    chromium \
+    nss \
+    freetype \
+    harfbuzz
 
-# Variables de entorno para Puppeteer
+RUN apk add --no-cache \
+    ca-certificates \
+    freetype-dev \
+    ttf-freefont \
+    font-noto-emoji
+
+# Variables necesarias para Puppeteer
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    CHROMIUM_PATH=/usr/bin/chromium-browser \
     NODE_ENV=production
 
-# Crear directorio de trabajo
+# Directorio de trabajo
 WORKDIR /app
 
 # Copiar dependencias
 COPY package.json ./
-COPY package-lock.json ./
 
 # Instalar dependencias sin errores
-RUN npm ci --omit=dev || npm install --production
+RUN npm install --production
 
-# Copiar todo el proyecto
+# Copiar el resto del código
 COPY . .
 
-# Usar un UID/GID aleatorio para evitar conflicto con Railway
-RUN adduser -D -s /bin/sh -u 1001 -G root appuser && \
-    chown -R appuser:root /app
+# Evitamos conflictos con el UID/GID 1000
+RUN adduser -D -s /bin/sh carsimulcast && \
+    chown -R carsimulcast:carsimulcast /app
 
-USER appuser
+# Ejecutar como usuario sin root
+USER carsimulcast
 
+# Puerto
 EXPOSE 3000
 
+# Comando de inicio
 CMD ["npm", "start"]
